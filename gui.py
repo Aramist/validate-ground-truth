@@ -95,28 +95,28 @@ def generate_gui_header(progress: Optional[tuple[int, int]] = None) -> np.ndarra
         (0, 0, 0),
         thickness,
     )
-    cv2.putText(
-        im,
-        legend[1],
-        (
-            im_width - legend_width - text_height - padding,
-            2 * padding + 2 * text_height,
-        ),
-        font_face,
-        font_scale,
-        (0, 0, 255),  # red
-        thickness,
-    )
-    cv2.circle(
-        im,
-        (
-            im_width - padding - text_height // 2,
-            2 * padding + text_height + text_height // 2,
-        ),
-        text_height // 2 - 2,
-        (0, 0, 255),
-        -1,
-    )
+    # cv2.putText(
+    #     im,
+    #     legend[1],
+    #     (
+    #         im_width - legend_width - text_height - padding,
+    #         2 * padding + 2 * text_height,
+    #     ),
+    #     font_face,
+    #     font_scale,
+    #     (0, 0, 255),  # red
+    #     thickness,
+    # )
+    # cv2.circle(
+    #     im,
+    #     (
+    #         im_width - padding - text_height // 2,
+    #         2 * padding + text_height + text_height // 2,
+    #     ),
+    #     text_height // 2 - 2,
+    #     (0, 0, 255),
+    #     -1,
+    # )
     cv2.putText(
         im,
         legend[2],
@@ -287,11 +287,11 @@ class GUI:
             cx, cy = int(x), int(y + self.resized_header_height)
             cv2.circle(frame_copy, (cx, cy), 5, (0, 180, 0), -1)
 
-        gt_x = row["ground_truth_x"]
-        gt_y = row["ground_truth_y"]
-        for x, y in zip(gt_x, gt_y):
-            cx, cy = int(x), int(y + self.resized_header_height)
-            cv2.circle(frame_copy, (cx, cy), 5, (0, 0, 255), -1)
+        # gt_x = row["ground_truth_x"]
+        # gt_y = row["ground_truth_y"]
+        # for x, y in zip(gt_x, gt_y):
+        #     cx, cy = int(x), int(y + self.resized_header_height)
+        #     cv2.circle(frame_copy, (cx, cy), 5, (0, 0, 255), -1)
 
         return frame_copy
 
