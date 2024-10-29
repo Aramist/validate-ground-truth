@@ -8,12 +8,12 @@ import pandas as pd
 VIDEO_SIZE = (640, 512)
 
 dataset_names = [
-    "dyadgerbil-4m-e1",
     "sologerbil-4m-e1",
     "edison-4m-e1",
     "gerbilearbud-4m-e1",
     "speaker-4m-e1",
     "hexapod-8m-e2",
+    "mouseearbud-24m-e3",
 ]
 
 # Path to processed dataset on cluster
@@ -24,30 +24,33 @@ dataset_files = [
 
 # Path to metadata on cluster (provides link between dataset index and video frame #, path)
 metadata_files = [
-    Path("/mnt/home/atanelus/ceph/datasets/dyadgerbil_metadata.csv"),
     Path("/mnt/home/atanelus/ceph/datasets/solo_gerbil_metadata.csv"),
     Path("/mnt/home/atanelus/ceph/datasets/edison_metadata.csv"),
     Path("/mnt/home/atanelus/ceph/datasets/gerbilearbud_metadata.csv"),
     Path("/mnt/home/atanelus/ceph/datasets/speaker_metadata.csv"),
     None,
+    Path(
+        "/mnt/home/atanelus/ceph/princeton_data/partial_datasets/2024_03_08_16_28_20.csv"
+    ),
 ]
 
 corner_points_file = [
-    Path("/mnt/home/atanelus/dataset_corner_points/gerbil_dyad_corner_points.npy"),
     Path("/mnt/home/atanelus/dataset_corner_points/antiphonal_corner_points.npy"),
     Path("/mnt/home/atanelus/dataset_corner_points/robot_corner_points.npy"),
     Path("/mnt/home/atanelus/dataset_corner_points/earbud_corner_points.npy"),
     Path("/mnt/home/atanelus/dataset_corner_points/speaker_corner_points.npy"),
     None,
+    None,
 ]
+
 
 arena_dims = [
     np.array([572, 360]),
     np.array([572, 360]),
     np.array([572, 360]),
-    np.array([572, 360]),
     np.array([558.9, 355.6]),
     None,
+    np.array([615, 615]),
 ]
 
 to_list = lambda x: "[" + " ".join(map(str, x)) + "]"
@@ -101,15 +104,15 @@ def gather_images_and_gtruth(
     corner_points_path = corner_points_file[dataset_idx]
     dataset_path = dataset_files[dataset_idx]
 
-    if metadata_path is None or corner_points_path is None:
+    if metadata_path is None:  # or corner_points_path is None:
         print(f"Dataset {dset_name} does not have metadata or corner points. Skipping.")
         return
 
     # columns: _, video_path, frame_idx
     metadata = pd.read_csv(metadata_path)
-    corner_points = np.load(corner_points_path)
+    corner_points = np.load(corner_points_path) if corner_points_path else None
     adims = arena_dims[dataset_idx]
-    H = make_affine(corner_points, adims)
+    H = make_affine(corner_points, adims) if corner_points is not None else None
 
     new_df = pd.DataFrame(
         columns=[
@@ -141,7 +144,9 @@ def gather_images_and_gtruth(
             ground_truth = f["locations"][idx]
 
         # Convert points to global coordinate frame
-        points = convert_points(ground_truth, H).squeeze()
+        points = (
+            convert_points(ground_truth, H).squeeze() if H is not None else ground_truth
+        )
         # Save image and ground truth
         image_path = output_path / "images" / f"{idx}.png"
         cv2.imwrite(str(image_path), frame)
@@ -156,12 +161,8 @@ def gather_images_and_gtruth(
     new_df = pd.DataFrame(
         {
             "idx_in_dataset": idx_in_dataset,
-            "ground_truth_x": list(
-                map(lambda a: to_list(a.astype(int)), ground_truth_x)
-            ),
-            "ground_truth_y": list(
-                map(lambda a: to_list(a.astype(int)), ground_truth_y)
-            ),
+            "ground_truth_x": list(map(lambda a: to_list(a), ground_truth_x)),
+            "ground_truth_y": list(map(lambda a: to_list(a), ground_truth_y)),
             "manual_x": [list() for _ in range(len(idx_in_dataset))],
             "manual_y": [list() for _ in range(len(idx_in_dataset))],
         }

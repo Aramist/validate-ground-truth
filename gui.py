@@ -8,8 +8,7 @@ import pandas as pd
 HEADER_HEIGHT = 300
 
 datasets = [
-    "dyadgerbil-4m-e1",
-    # 'mouseearbud-24m-e3',
+    # "dyadgerbil-4m-e1",
     # 'dyadmouse-24m-e3',
     "sologerbil-4m-e1",
     "edison-4m-e1",
@@ -17,6 +16,7 @@ datasets = [
     "gerbilearbud-4m-e1",
     "speaker-4m-e1",
     "hexapod-8m-e2",
+    "mouseearbud-24m-e3",
 ]
 
 
@@ -287,6 +287,7 @@ class GUI:
             cx, cy = int(x), int(y + self.resized_header_height)
             cv2.circle(frame_copy, (cx, cy), 5, (0, 180, 0), -1)
 
+        ### Uncomment to display ground truth points
         # gt_x = row["ground_truth_x"]
         # gt_y = row["ground_truth_y"]
         # for x, y in zip(gt_x, gt_y):
